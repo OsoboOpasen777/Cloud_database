@@ -1,6 +1,8 @@
+// app/layout.tsx
+
 export const metadata = {
-  title: "KPI Dashboard",
-  description: "Мониторинг показателей",
+  title: 'KPI Dashboard',
+  description: 'Панель управления показателями',
 };
 
 export default function RootLayout({
@@ -10,8 +12,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <head />
-      <body>{children}</body>
+      <body style={{ margin: 0, fontFamily: 'sans-serif' }}>
+        {children}
+      </body>
     </html>
   );
 }
