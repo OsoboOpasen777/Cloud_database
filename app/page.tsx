@@ -6,8 +6,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
 
-  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   useEffect(() => {
     async function fetchData() {
@@ -29,14 +29,13 @@ export default function Home() {
       }
       setLoading(false);
     }
-
     fetchData();
     const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  const filtered = kpiData.filter((item: any) =>
-    item.metric_name.toLowerCase().includes(filter.toLowerCase())
+  const filtered = kpiData.filter((item) =>
+    item.metric_name?.toLowerCase().includes(filter.toLowerCase())
   );
 
   return (
@@ -54,7 +53,7 @@ export default function Home() {
         <p>Нет данных</p>
       ) : (
         <div style={{ display: "grid", gap: 16 }}>
-          {filtered.map((item: any) => (
+          {filtered.map((item) => (
             <div
               key={item.id}
               style={{
