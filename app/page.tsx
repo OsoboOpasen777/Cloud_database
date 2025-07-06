@@ -1,77 +1,76 @@
+"use client";
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "framer-motion";
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export default function Home() {
   const [kpiData, setKpiData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
 
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/kpi?select=*`,
-        {
-          headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setKpiData(data);
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/kpi?select=*`,
+          {
+            headers: {
+              apikey: SUPABASE_KEY,
+              Authorization: `Bearer ${SUPABASE_KEY}`,
+            },
+          }
+        );
+        const data = await response.json();
+        setKpiData(data);
+      } catch (err) {
+        console.error("Ошибка загрузки:", err);
+      }
       setLoading(false);
     }
+
     fetchData();
     const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  const filteredData = kpiData.filter((item) =>
+  const filtered = kpiData.filter((item: any) =>
     item.metric_name.toLowerCase().includes(filter.toLowerCase())
   );
 
   return (
-    <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">📊 KPI Dashboard</h1>
-      <Input
+    <main style={{ padding: 24, fontFamily: "sans-serif" }}>
+      <h1 style={{ fontSize: "24px", fontWeight: "bold" }}>📊 KPI Dashboard</h1>
+      <input
+        style={{ padding: 8, margin: "12px 0", width: 300 }}
         placeholder="Фильтр по метрике..."
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
-        className="max-w-md"
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {loading ? (
-          [...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-2xl" />
-          ))
-        ) : filteredData.length === 0 ? (
-          <p className="text-gray-500 col-span-full">Нет данных</p>
-        ) : (
-          filteredData.map((item) => (
-            <motion.div
+      {loading ? (
+        <p>Загрузка данных...</p>
+      ) : filtered.length === 0 ? (
+        <p>Нет данных</p>
+      ) : (
+        <div style={{ display: "grid", gap: 16 }}>
+          {filtered.map((item: any) => (
+            <div
               key={item.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+              style={{
+                border: "1px solid #ccc",
+                borderRadius: 8,
+                padding: 16,
+                boxShadow: "2px 2px 6px rgba(0,0,0,0.1)",
+              }}
             >
-              <Card className="rounded-2xl shadow-md">
-                <CardContent className="p-4 space-y-2">
-                  <h2 className="text-lg font-semibold">{item.metric_name}</h2>
-                  <p className="text-2xl font-bold">{item.metric_value}</p>
-                  <p className="text-sm text-gray-500">{item.updated_at?.split("T")[0]}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))
-        )}
-      </div>
-    </div>
+              <h2>{item.metric_name}</h2>
+              <p style={{ fontSize: 20 }}>{item.metric_value}</p>
+              <p style={{ color: "#777" }}>{item.updated_at?.split("T")[0]}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
   );
 }
